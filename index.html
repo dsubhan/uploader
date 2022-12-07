@@ -1,0 +1,94 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://kit.fontawesome.com/6cc015b7d9.js" crossorigin="anonymous"></script>
+    <title>File upload</title>
+</head>
+<body class="">
+    <header class="text-center text-3xl">
+        <h1 class="mt-4">File uploader</h1>
+    </header>
+
+    <main class="mt-32 w-1/3 mx-auto">
+
+            <div id="drop_zone" ondrop="dropHandler(event);" ondragover="dragOverHandler(event);"  
+                 class="p-12 border-2 border-dashed border-sky-700 rounded-lg flex flex-col items-center bg-slate-200">
+                <i class="fa-solid fa-arrow-up-from-bracket fa-7x text-sky-700"></i>
+                <div class="mt-4  flex flex-row text-xl">
+                    <label for="fileupload" class="cursor-pointer text-sky-800"><strong>Select a file </strong></label>
+                    <input id="fileupload" name="fileupload" type="file" class="hidden">
+                    <p class="ml-1 text-slate-900"> or drag it here</p>
+                </div>
+
+                <button id="upload_button" onclick="uploadFile()" class="text-lg mt-4 bg-sky-700 text-white px-2 py-1 rounded-lg hover:bg-sky-600">Upload</button>
+            </div>
+        
+        
+    </main>
+
+    <footer>
+
+    </footer>   
+    
+    <script>
+        function dropHandler(ev) {
+            console.log('File(s) dropped');
+            var dropData = new FormData();
+            // Prevent default behavior (Prevent file from being opened)
+            ev.preventDefault();
+
+            if (ev.dataTransfer.items) {
+                // Use DataTransferItemList interface to access the file(s)
+                [...ev.dataTransfer.items].forEach((item, i) => {
+                // If dropped items aren't files, reject them
+                if (item.kind === 'file') {
+                    const file = item.getAsFile();
+                    console.log(`… file[${i}].name = ${file.name}`);
+                    const files = file;
+                    dropData.append("file", files);
+                    fetch("./upload.php",{
+                        method: "POST",
+                        body: dropData
+                    });
+                    alert("The file has been uploaded successfully, file url: https://uploader.david-subhan.cz/upload/" + file.name );
+                }
+                });
+            } else {
+                // Use DataTransfer interface to access the file(s)
+                [...ev.dataTransfer.files].forEach((file, i) => {
+                    console.log(`… file[${i}].name = ${file.name}`);
+                    const files = ev.originalEvent.dataTransfer;
+                    dropData.append("file", files);
+                    fetch("./upload.php",{
+                        method: "POST",
+                        body: dropData
+                    });
+                    alert("The file has been uploaded successfully, file url: https://uploader.david-subhan.cz/upload/" + file.name );
+                });
+            }
+        }
+
+        function dragOverHandler(ev) {
+            console.log('File(s) in drop zone');
+
+            // Prevent default behavior (Prevent file from being opened)
+            ev.preventDefault();
+        }
+
+        async function uploadFile(){
+            let formData = new FormData();
+            formData.append("file", fileupload.files[0]);
+            fetch('./upload.php', {
+                method: "POST",
+                body: formData
+            });
+            alert("The file has been uploaded successfully, file url: https://uploader.david-subhan.cz/upload/" + fileupload.files[0].name );
+        }
+    </script>
+</body>
+</html>
